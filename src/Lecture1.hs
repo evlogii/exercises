@@ -51,7 +51,7 @@ Explanation: @sumOfSquares 3 4@ should be equal to @9 + 16@ and this
 is 25.
 -}
 -- DON'T FORGET TO SPECIFY THE TYPE IN HERE
-sumOfSquares :: Num a => a -> a -> a
+sumOfSquares :: Int -> Int -> Int
 sumOfSquares x y = (x*x) + (y*y)
 
 {- | Implement a function that returns the last digit of a given number.
@@ -66,7 +66,7 @@ sumOfSquares x y = (x*x) + (y*y)
 -}
 -- DON'T FORGET TO SPECIFY THE TYPE IN HERE
 lastDigit :: Int -> Int
-lastDigit n = mod (abs n) 10
+lastDigit n = abs n `mod` 10
 
 {- | Write a function that takes three numbers and returns the
 difference between the biggest number and the smallest one.
@@ -141,16 +141,14 @@ and lower than 6 elements (4, 5, 6, 7, 8 and 9).
 
 lowerAndGreater :: Int -> [Int] -> [Char]
 lowerAndGreater number arr = printOut number greaterNum lowerNum
-    where lowerAndGreaterArr :: Int -> [Int] -> [Int]
-          lowerAndGreaterArr _ []     = []
-          lowerAndGreaterArr n [x]    | x > n = [1] | x < n = [-1] | otherwise = [0]
-          lowerAndGreaterArr n (x:xs) = lowerAndGreaterArr n [x]  ++ lowerAndGreaterArr n xs
+    where lowerAndGreaterArr :: Int -> Int -> Int -> [Int] -> (Int, Int)
+          lowerAndGreaterArr _ l g [] = (l,g)
+          lowerAndGreaterArr n l g (x:xs)
+                        | x > n =     lowerAndGreaterArr n (l+1)  g    xs
+                        | x < n =     lowerAndGreaterArr n  l    (g+1) xs
+                        | otherwise = lowerAndGreaterArr n  l     g    xs
 
-          numTimesFound :: Eq a => a -> [a] -> Int
-          numTimesFound x = length . filter (== x)
-
-          lowerNum = numTimesFound 1 $ lowerAndGreaterArr number arr
-          greaterNum = numTimesFound (-1) $ lowerAndGreaterArr number arr
+          (lowerNum, greaterNum) = lowerAndGreaterArr number 0 0 arr
 
           printOut :: Int -> Int -> Int -> String
           printOut n gn ln = show n ++ " is greater than " ++ show gn ++ " elements and lower than " ++ show ln ++ " elements"
