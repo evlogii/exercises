@@ -48,7 +48,10 @@ zero, you can stop calculating product and return 0 immediately.
 84
 -}
 lazyProduct :: [Int] -> Int
-lazyProduct = error "TODO"
+lazyProduct [] = 1
+lazyProduct (x:xs)
+  | x == 0 = 0
+  | otherwise = x * lazyProduct xs
 
 {- | Implement a function that duplicates every element in the list.
 
@@ -58,7 +61,8 @@ lazyProduct = error "TODO"
 "ccaabb"
 -}
 duplicate :: [a] -> [a]
-duplicate = error "TODO"
+duplicate []     = []
+duplicate (x:xs) = x: x: duplicate xs
 
 {- | Implement function that takes index and a list and removes the
 element at the given position. Additionally, this function should also
@@ -70,7 +74,14 @@ return the removed element.
 >>> removeAt 10 [1 .. 5]
 (Nothing,[1,2,3,4,5])
 -}
-removeAt = error "TODO"
+
+removeAt :: Int -> [a] -> (Maybe a, [a])
+removeAt index nums
+      | index < 0 = (Nothing, nums)
+      | index >= length part1 = (Nothing, nums)
+      | otherwise = (Just (last part1), init part1 ++ part2)
+        where
+          (part1, part2) = splitAt (index+1) nums
 
 {- | Write a function that takes a list of lists and returns only
 lists of even lengths.
@@ -81,7 +92,9 @@ lists of even lengths.
 ♫ NOTE: Use eta-reduction and function composition (the dot (.) operator)
   in this function.
 -}
-evenLists = error "TODO"
+
+evenLists :: [[a]] -> [[a]]
+evenLists = filter (even . length)
 
 {- | The @dropSpaces@ function takes a string containing a single word
 or number surrounded by spaces and removes all leading and trailing
@@ -97,7 +110,9 @@ spaces.
 
 🕯 HINT: look into Data.Char and Prelude modules for functions you may use.
 -}
-dropSpaces = error "TODO"
+
+dropSpaces :: String -> String
+dropSpaces = head . words
 
 {- |
 
@@ -160,7 +175,62 @@ data Knight = Knight
     , knightEndurance :: Int
     }
 
-dragonFight = error "TODO"
+data DragonType =
+  Red | Green | Black
+  deriving (Eq)
+
+data Dragon = Dragon
+    {dragonHealth :: Int
+    ,dragonAttack :: Int
+    ,dragonType   :: DragonType
+    ,dragonChest  :: Chest
+    }
+
+data Chest = Chest
+    {chestGold     :: Int
+    ,chestTreasure :: Maybe String
+    }
+
+type Experience = Int
+
+data Reward = Reward {
+   rewardChest :: Chest
+  ,rewardExp   :: Experience
+}
+
+getExp :: Dragon -> Experience
+getExp dragon = case dragonType dragon of
+  Red   -> 100
+  Green -> 250
+  Black -> 150
+
+getReward :: Dragon -> Reward
+getReward dragon
+  |dragonType dragon == Green = Reward {rewardChest = (dragonChest dragon){chestTreasure = Nothing},
+                                        rewardExp = getExp dragon}
+  | otherwise                 = Reward  {rewardChest = dragonChest dragon, rewardExp = getExp dragon}
+
+data FightResult = BothAlive Knight Dragon
+                 | KnightDead Dragon
+                 | DragonDead Knight Reward
+
+dragonFight :: Knight -> Dragon -> FightResult
+dragonFight = fight 0
+  where
+    fight :: Int -> Knight -> Dragon -> FightResult
+    fight turn kn dr
+        | knightHealth kn <= 0 = KnightDead dr
+        | knightEndurance kn <= 0 = BothAlive kn dr
+        | dragonHealth dr <= 0 = DragonDead kn (getReward dr)
+        | otherwise = if turn `mod` 10 == 0
+                          then
+                           fight (turn+1) kn{knightHealth = knightHealth kn - dragonAttack dr} dr
+                          else
+                           fight (turn+1) kn dr{dragonHealth = dragonHealth dr - knightAttack kn}
+
+
+
+
 
 ----------------------------------------------------------------------------
 -- Challenges
@@ -181,7 +251,11 @@ False
 True
 -}
 isIncreasing :: [Int] -> Bool
-isIncreasing = error "TODO"
+isIncreasing [] = True
+isIncreasing [_] = True
+isIncreasing (x1: x2: xs)
+  | x1 > x2 = False
+  | otherwise = isIncreasing (x2:xs)
 
 {- | Implement a function that takes two lists, sorted in the
 increasing order, and merges them into new list, also sorted in the
@@ -194,7 +268,11 @@ verify that.
 [1,2,3,4,7]
 -}
 merge :: [Int] -> [Int] -> [Int]
-merge = error "TODO"
+merge [] list2 = list2
+merge list1 [] = list1
+merge (x1:list1) (x2:list2)
+  | x1 < x2 =   x1 : merge list1 (x2:list2)
+  | otherwise = x2 : merge (x1:list1) list2
 
 {- | Implement the "Merge Sort" algorithm in Haskell. The @mergeSort@
 function takes a list of numbers and returns a new list containing the
@@ -211,7 +289,10 @@ The algorithm of merge sort is the following:
 [1,2,3]
 -}
 mergeSort :: [Int] -> [Int]
-mergeSort = error "TODO"
+mergeSort [] = []
+mergeSort [x] = [x]
+mergeSort xs = merge (mergeSort (fst halfed)) (mergeSort (snd halfed))
+  where halfed = splitAt ((length xs + 1) `div` 2) xs
 
 
 {- | Haskell is famous for being a superb language for implementing
@@ -264,7 +345,30 @@ data EvalError
 It returns either a successful evaluation result or an error.
 -}
 eval :: Variables -> Expr -> Either EvalError Int
-eval = error "TODO"
+eval _ (Lit value) = Right value
+eval variables (Var variable) = if value == Nothing
+                                then Left (VariableNotFound variable)
+                                else Right (fromJust value)
+  where value = lookup variable variables
+        fromJust               :: Maybe a -> a
+        fromJust (Just a) =  a
+        fromJust Nothing  =  error "fromJust: Nothing"
+
+eval variables (Add frst scnd) = if isRight evalFrst && isRight evalScnd
+                                 then Right (fromRight 0 evalFrst + fromRight 0 evalScnd)
+                                 else Left (pickLeft evalFrst evalScnd)
+  where evalFrst = eval variables frst
+        evalScnd = eval variables scnd
+        fromRight :: b -> Either a b -> b
+        fromRight _ (Right b) = b
+        fromRight b _         = b
+        isRight :: Either a b -> Bool
+        isRight (Left  _) = False
+        isRight (Right _) = True
+        pickLeft :: Either a b -> Either a b -> a
+        pickLeft (Left a) _ = a
+        pickLeft _ (Left a) = a
+        pickLeft _ _        = error "pickLeft: both Right"
 
 {- | Compilers also perform optimizations! One of the most common
 optimizations is "Constant Folding". It performs arithmetic operations
@@ -288,4 +392,18 @@ Write a function that takes and expression and performs "Constant
 Folding" optimization on the given expression.
 -}
 constantFolding :: Expr -> Expr
-constantFolding = error "TODO"
+constantFolding expression = buildExp (sum literals) variables
+  where (literals, variables) = go [] [] expression
+        go :: [Int] -> [String] -> Expr -> ([Int], [String])
+        go lits vars (Var x)     = (lits, x:vars)
+        go lits vars (Lit x)     = (x:lits, vars)
+        go lits vars (Add x1 x2) = consTuples (go lits vars x1) (go lits vars x2)
+
+        buildExp :: Int -> [String] -> Expr
+        buildExp 0    []       = Lit 0
+        buildExp lits []       = Lit lits
+        buildExp 0 [var]       = Var var
+        buildExp lits (v:vars) = Add (Var v) (buildExp lits vars)
+
+        consTuples :: ([Int], [String]) -> ([Int], [String]) -> ([Int], [String])
+        consTuples (t1x, t1y) (t2x, t2y) = (t1x ++ t2x, t1y ++ t2y)
