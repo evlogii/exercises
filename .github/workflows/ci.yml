@@ -20,7 +20,7 @@ jobs:
         ghc: ["8.10.7"]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - uses: haskell/actions/setup@v1.2
       id: setup-haskell-cabal
@@ -37,7 +37,7 @@ jobs:
       run: |
         cabal freeze
 
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       name: Cache ~/.cabal/store
       with:
         path: ${{ steps.setup-haskell-cabal.outputs.cabal-store }}
@@ -65,7 +65,7 @@ jobs:
         ghc: ["8.10.7"]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - uses: haskell/actions/setup@v1.2
       name: Setup Haskell Stack
@@ -73,7 +73,7 @@ jobs:
         ghc-version: ${{ matrix.ghc }}
         stack-version: ${{ matrix.stack }}
 
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       name: Cache ~/.stack
       with:
         path: ~/.stack
@@ -95,7 +95,7 @@ jobs:
         cabal: ["3.6.2.0"]
         ghc: ["8.10.7"]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - uses: haskell/actions/setup@v1
       name: Setup Haskell
@@ -103,7 +103,7 @@ jobs:
         ghc-version: ${{ matrix.ghc }}
         cabal-version: ${{ matrix.cabal }}
 
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       name: Cache ~/.cabal/store
       with:
         path: ~/.cabal/store
@@ -126,7 +126,7 @@ jobs:
         cabal: ["3.6.2.0"]
         ghc: ["8.10.7"]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - uses: haskell/actions/setup@v1
       name: Setup Haskell
@@ -134,7 +134,7 @@ jobs:
         ghc-version: ${{ matrix.ghc }}
         cabal-version: ${{ matrix.cabal }}
 
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       name: Cache ~/.cabal/store
       with:
         path: ~/.cabal/store
@@ -162,7 +162,7 @@ jobs:
         cabal: ["3.6.2.0"]
         ghc: ["8.10.7"]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - uses: haskell/actions/setup@v1
       name: Setup Haskell
@@ -170,7 +170,7 @@ jobs:
         ghc-version: ${{ matrix.ghc }}
         cabal-version: ${{ matrix.cabal }}
 
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       name: Cache ~/.cabal/store
       with:
         path: ~/.cabal/store
@@ -193,7 +193,7 @@ jobs:
         cabal: ["3.6.2.0"]
         ghc: ["8.10.7"]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - uses: haskell/actions/setup@v1
       name: Setup Haskell
@@ -201,7 +201,7 @@ jobs:
         ghc-version: ${{ matrix.ghc }}
         cabal-version: ${{ matrix.cabal }}
 
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       name: Cache ~/.cabal/store
       with:
         path: ~/.cabal/store
